@@ -453,6 +453,30 @@
 
 
 @media only screen and (max-width : 1024px) {
+  .tool-container{
+    width: 85%;
+  }
+
+  .bc-player-mljwfNw7qP_default{
+    width: 100% !important;
+  }
+
+  .comment{
+    font-size: 12px;
+  }
+
+  .submit-btn{
+    font-size: 12px;
+    height: 45px;
+  }
+  
+  .popupButton{
+    padding: 11px 16px;
+    margin: 10px 2px;
+    height: 40px;
+    font-size: 12px;
+  }
+
   .next-btn{
     position: static;
     margin: 0 auto;
