@@ -16,13 +16,14 @@ var lastSecSliderChange = 0;
 var nextOutputUpdateTime = interval;
 var lastTime = 0.0;
 var sliderValues = [];
+var tuneout = false;
 
 // Data Object 
 let respId = 120;
 let gender = " ";
 let age = 20;
 let country = " ";
-let dataString = " ";
+let dataString = outputStr;
 
 let dataObject = {
     "respId": respId,
@@ -79,7 +80,7 @@ function enableSlider(){
 }
 
 function disableComment() {
-    console.log("DISABLE COMMENT")
+    // console.log("DISABLE COMMENT")
     $(".submit-btn").css({"pointer-events": "none"});
     $(".comment").css({"pointer-events": "none"});
     document.querySelector(".comment").disabled = true;
@@ -87,7 +88,7 @@ function disableComment() {
 }
 
 function enableComment() {
-    console.log("ENABLE COMMENT")
+    // console.log("ENABLE COMMENT")
     $(".submit-btn").css({"pointer-events": "auto"});
     $(".comment").css({"pointer-events": "auto"});
     document.querySelector(".comment").disabled = false;
@@ -95,7 +96,7 @@ function enableComment() {
 }
 
 function skipToEnd() {
-    
+    mainVideo.currentTime = mainVideo.duration;
 }
 
 container.addEventListener("mousemove", () => {
@@ -114,7 +115,7 @@ mainVideo.addEventListener("timeupdate", e => {
         nextOutputUpdateTime += interval;
         updateOutput();
     }
-    console.log("Time", e.target.currentTime)
+    // console.log("Time", e.target.currentTime)
 });
 
 const formatTime = time => {
@@ -148,23 +149,29 @@ $(".range").on("change", () => {
     // console.log(mins + ": Mins", secs + ": Secs")
     // $('.output').val($('.output').val() + ", " + mainVideo.currentTime.toFixed(2) + ":" +  $(".rating-range-slider").val());
     mainVideo.pause();
-    console.log(commentBox)
+    // console.log(commentBox)
     commentBox.focus();
     controls.style.display = "none";
     enableComment()
 });
 
 $(".submit-btn").on("click", (e)=>{
-    
-    console.log($(".comment").val() == "")
     if($(".comment").val() == "")
-        return;
-    console.log("SUBMIT BTN")
-    videoPlay();
-    console.log(commentBox)
-    // commentBox.focus();
-    controls.style.display = "flex";
-    console.log(commentBox.value);
+            return;
+    if(!tuneout){
+        // console.log($(".comment").val() == "")
+        // if($(".comment").val() == "")
+        //     return;
+        // console.log("SUBMIT BTN")
+        videoPlay();
+        // console.log(commentBox)
+        // commentBox.focus();
+        controls.style.display = "flex";
+        // console.log(commentBox.value);
+    }else if(tuneout){
+        videoPlay();
+        controls.style.display = "flex";
+    }
 })
 
 $(".comment").on("keyup", (e)=> {
@@ -189,7 +196,11 @@ $(".popup-closeIcon").click(() => {
 });
 
 $(".tuneout-button").click(() => {
-
+    tuneout = true;
+    // skipToEnd();
+    controls.style.display = "none";
+    videoPause();
+    enableComment();
 });
 
 function checkValidComment(comment){
@@ -211,11 +222,17 @@ function updateOutput() {
     var secs = Math.floor(timeInSec % 60);
         
     if(mainVideo.currentTime > interval){
-        outputStr = $('.output').val() + ", " + lastTime.toFixed(1) + ":" +  $(".rating-range-slider").val() + "~" + $(".comment").val();
-        $('.output').val(outputStr);
+        if(!tuneout){
+            outputStr = $('.output').val() + ", " + lastTime.toFixed(1) + ":" +  $(".rating-range-slider").val() + "^" + "~" + $(".comment").val();
+            $('.output').val(outputStr);
+        }else{
+            outputStr = $('.output').val() + ", " + lastTime.toFixed(1) + ":" +  $(".rating-range-slider").val() + "^" + tuneOutVal + "~" + $(".comment").val();
+            $('.output').val(outputStr);
+            tuneout = false;
+        }
     }
     else{
-        outputStr = lastTime.toFixed(1) + ":" +  $(".rating-range-slider").val()+ "~" + $(".comment").val();
+        outputStr = lastTime.toFixed(1) + ":" +  $(".rating-range-slider").val() + "^" + "~" + $(".comment").val();
         $('.output').val(outputStr);
     }
 
@@ -225,8 +242,9 @@ function updateOutput() {
 
 
 $(".next-btn").click(() => {
-    // sendRespData(dataObject)
-    console.log(outputStr)
+    dataObject.data = outputStr;
+    // dataString = outputStr;
+    sendRespData(dataObject)
 });
 
 
@@ -234,21 +252,33 @@ $(".next-btn").click(() => {
 
 
 function sendRespData(data){
-    // fetch('http://localhost:5000/userinputs/insertdata', {
-    //     method: 'POST',
-    //     body: JSON.stringify(data),
-    //     headers: {
-    //         'Content-type': 'application/json; charset=UTF-8'
-    //     }
-    // }).then(function (response) {
-    //     if (response.ok) {
-    //         return response.json();
-    //     }
-    //     return Promise.reject(response);
-    // }).then(function (data) {
-    //     console.log(data);
-    // }).catch(function (error) {
-    //     console.warn('Something went wrong.', error);
-    // });
-    console.log(data)
+    let apiStatusCode;
+    fetch('http://182.73.21.22:39003/api/userinputs/insertdata', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+            'Content-type': 'application/json; charset=UTF-8'
+        }
+    })
+    .then((response) => {
+        apiStatusCode = response.status;
+        if (response.ok) {
+            return response.json();
+        }
+        return Promise.reject(response);
+    })
+    .then((data) => {
+        console.log("Data Saved in Database!", data);
+    })
+    .catch((error) => {
+        if(apiStatusCode == 400){
+            console.log("Error 400 - Bad Request! Check Payload", error)
+        }
+        else if(apiStatusCode == 404){
+            console.log("The server can not find the requested resource.")
+        }
+        else if(apiStatusCode == 500){
+            console.log("Internal Server Error - Data Not Saved !")
+        }
+    });
 }
