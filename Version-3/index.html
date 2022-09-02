@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Custom-Video-Markup-Question</title>
+    <link rel="stylesheet" href="./css/custom._dev.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- These 3 links are only for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <script src="https://ui.e2eresearch.com/Custom-Video-Markup-Question/js/jquery.min.js"></script>
+    <link href="https://players.brightcove.net/videojs-overlay/2/videojs-overlay.css" rel='stylesheet'> </head>
+    <script>
+        var min = 0;
+        var max = 100;
+        var defaultValue = 50;
+        var interval = 0.5; // Min Value 0.3 (milliseconds)
+        var tuneOutVal = 999;
+        var tuneOutDescription = "";
+    </script>
+  </head>
+  <body>
+
+    <div class="tool-container">
+        <div class="container show-controls">
+            <video id="player"
+            data-account="79558313" 
+            data-player="By07tWfQ" 
+            data-embed="default"
+            data-video-id="2784419339001"
+            class="video-js" 
+            controls></video>
+        </div> 
+    </div>
+
+    <div class="output_container">
+        <input type="text" class="output" style="width: 100%;" >
+    </div>
+    <script src="./js/custom._dev.js"></script>
+    
+    <script src="//players.brightcove.net/79558313/By07tWfQ_default/index.min.js"></script>
+  </body>
+</html>
